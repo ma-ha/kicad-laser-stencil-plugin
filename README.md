@@ -1,12 +1,12 @@
-# GCode Laser Stencil Generator for KiCAD PCBs
+# G-Code Laser Stencil Generator for KiCAD PCBs
  
-KiCAD Pcbnew plugin to generat laser cutter GCode files for solder paste stencils
+KiCAD Pcbnew plugin to generat laser cutter G-Code files for solder paste stencils
 
 ![Screenshot](screen.png)
 
-Generated GCode files:
+Generated G-Code files:
 
-* Front side stencil border: for adjusting the position of the stencil
+* Front side stencil border (laser off): for adjusting the position of the stencil
 * Front side stencil containing border markings and footprint cuttings
 * Back side stencil border
 * Back side stencil cutting
@@ -38,6 +38,7 @@ The plugin icon should appear in the tool bar.
 * process other than "roundrect" pads 
 * make "roundrect" with rounded corners, not simply rectangular
 * clean up non used code
+* test on other than Ubuntu (sorry, no Win or Mac here)
 
 # Feedback welcome
 
