@@ -13,7 +13,7 @@ Generated GCode files:
 
 The plugin is based on the awesome [iBom plugin](https://github.com/openscopeproject/InteractiveHtmlBom) code.
 
-## Installation
+# Installation
 
 Copy the whole `laser-stencil` folder (including all files and sub-folders) into your KiCAD plugin directory.
 
@@ -33,6 +33,16 @@ Restart of Pcbnew.
 
 The plugin icon should appear in the tool bar.
 
-## License
+# TODO
+
+* process other than "roundrect" pads 
+* make "roundrect" with rounded corners, not simply rectangular
+* clean up non used code
+
+# Feedback welcome
+
+Please feel free to create a GitHub Issue for feature requests, issues or questions.
+
+# License
 
 MIT License, Copyright (c) 2021 ma-ha
