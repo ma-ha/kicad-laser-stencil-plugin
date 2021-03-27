@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import sys
+import math
 from datetime import datetime
 
 import wx
@@ -350,10 +351,15 @@ def gcode_pads( pcbdata, config, pcb_side ):
   miny = pcbdata["edges_bbox"]["miny"]
   maxx = pcbdata["edges_bbox"]["maxx"] 
   maxy = pcbdata["edges_bbox"]["maxy"]
-  def cX( x ):
-    return str( round_floats( maxx - x, 3 ) )
+  def cX( x0, dx, dy, a ):
+    x = x0 + math.cos( a ) * dx - math.sin( a ) * dy 
+    if pcb_side is "F":
+      return str( round_floats( x - minx, 3 ) )
+    else:
+      return str( round_floats( maxx - x, 3 ) )
     
-  def cY( y ):
+  def cY( y0, dx, dy, a ):
+    y = y0 + math.sin( a ) * dx + math.cos( a ) * dy 
     if pcb_side is "F":
       return str( round_floats( y - miny, 3 ) )
     else: 
@@ -371,8 +377,11 @@ def gcode_pads( pcbdata, config, pcb_side ):
         for pad in footprint["pads"]:
           if pad["type"] is "smd":
             if pad["shape"] is "roundrect":
-              newPad = { 'ref': footprint["ref"], 'px': pad["pos"][0], 'py': pad["pos"][1], 
-                'sx': pad["size"][0] / 2, 'sy': pad["size"][1] / 2 }
+              # gcode += "(" + repr (pad ) + ")\n"
+              newPad = { 'ref': footprint["ref"], 
+                'px': pad["pos"][0], 'py': pad["pos"][1], 
+                'sx': pad["size"][0] / 2, 'sy': pad["size"][1] / 2, 
+                'angle': math.radians( pad["angle"] ) }
               sortPad.append( newPad )
   # gcode += repr (sortPad )
 
@@ -383,15 +392,16 @@ def gcode_pads( pcbdata, config, pcb_side ):
     py = pad["py"]
     sx = pad["sx"]
     sy = pad["sy"]
+    a  = pad["angle"]
     
     gcode += "( FOOTPRINT: "+ pad["ref"] + " )\n"
-    gcode += 'G00 X'+cX( px - sx )+ ' Y'+cY( py - sy ) +'\n'
+    gcode += 'G00 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) +'\n'
     gcode += 'M03 S'+intensity +'\n'
     for passCnt in range(passes):
-      gcode += 'G01 X'+cX( px - sx )+ ' Y'+cY( py + sy ) + speed+'\n'
-      gcode += 'G01 X'+cX( px + sx )+ ' Y'+cY( py + sy ) +'\n'
-      gcode += 'G01 X'+cX( px + sx )+ ' Y'+cY( py - sy ) +'\n'
-      gcode += 'G01 X'+cX( px - sx )+ ' Y'+cY( py - sy ) +'\n'
+      gcode += 'G01 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) + speed+'\n'
+      gcode += 'G01 X'+cX( px,  sx,  sy, a )+ ' Y'+cY( py,  sx,  sy, a ) +'\n'
+      gcode += 'G01 X'+cX( px,  sx, -sy, a )+ ' Y'+cY( py,  sx, -sy, a ) +'\n'
+      gcode += 'G01 X'+cX( px, -sx, -sy, a )+ ' Y'+cY( py, -sx, -sy, a ) +'\n'
     gcode += 'M05 S0\n'
     # search nearest next pad
     nextPad = 0
@@ -405,27 +415,6 @@ def gcode_pads( pcbdata, config, pcb_side ):
           dist = dist2
         i += 1
       gcode += "   (d "+str(dist)+ " "+str(i)+" )\n"
-
-  # # simple non-optimized path:
-  # for footprint in pcbdata["footprints"]:
-  #   if footprint["layer"] is pcb_side:
-  #     gcode += "( FOOTPRINT: "+ footprint["ref"] + " )\n"
-  #     for pad in footprint["pads"]:
-  #       if pad["type"] is "smd":
-  #         if  pad["shape"] is "roundrect":
-  #           px = pad["pos"][0]
-  #           py = pad["pos"][1]
-  #           sx = pad["size"][0] / 2
-  #           sy = pad["size"][1] / 2
-  #           gcode += 'G00 X'+cX( px - sx )+ ' Y'+cY( py - sy ) +' F100\n'
-  #           gcode += 'M03 S'+intensity +'\n'
-  #           for i in range(passes):
-  #             gcode += 'G01 X'+cX( px - sx )+ ' Y'+cY( py + sy ) +'\n'
-  #             gcode += 'G01 X'+cX( px + sx )+ ' Y'+cY( py + sy ) +'\n'
-  #             gcode += 'G01 X'+cX( px + sx )+ ' Y'+cY( py - sy ) +'\n'
-  #             gcode += 'G01 X'+cX( px - sx )+ ' Y'+cY( py - sy ) +'\n'
-  #           gcode += 'M05 S0\n\n' 
-  #     gcode += "\n"
 
   return gcode
 
