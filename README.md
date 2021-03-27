@@ -6,10 +6,10 @@ KiCAD Pcbnew plugin to generat laser cutter G-Code files for solder paste stenci
 
 Generated G-Code files:
 
-* Front side stencil border (laser off): for adjusting the position of the stencil
-* Front side stencil containing border markings and footprint cuttings
-* Back side stencil border
-* Back side stencil cutting
+* `<NAME>_F_Edge.gcode`: Front side stencil border (laser off): for adjusting the position of the stencil
+* `<NAME>_F.gcode`: Front side stencil containing border markings and footprint cuttings
+* `<NAME>_B_Edge.gcode`: Back side stencil border
+* `<NAME>_B.gcode`: Back side stencil cutting
 
 The plugin is based on the awesome [iBom plugin](https://github.com/openscopeproject/InteractiveHtmlBom) code.
 
@@ -42,7 +42,7 @@ The plugin icon should appear in the tool bar.
 
 # Feedback welcome
 
-Please feel free to create a GitHub Issue for feature requests, issues or questions.
+Please feel free to create a GitHub "issue" for feature requests, issues or questions.
 
 # License
 
