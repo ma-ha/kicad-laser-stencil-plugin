@@ -33,6 +33,19 @@ Restart of Pcbnew.
 
 The plugin icon should appear in the tool bar.
 
+# Config
+
+Not all configuration parameters are in the dialog. 
+To change these defaults, open the dialog, click "Save current settings" and
+edit the "stencil-config.ini" text file in the plugin folder.
+
+These settings are available only via config file:
+* laser_x_width (defauly=0.08)
+* laser_y_width (default=0.08)
+* laser_border_speed (default=200)
+
+To reset settings, just delete the respective config lines or the whole file.
+
 # TODO
 
 * process other than "roundrect" pads 

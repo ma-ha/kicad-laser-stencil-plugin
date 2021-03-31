@@ -241,7 +241,7 @@ def searchNearestNextEdge( sortEdges, px, py ):
 def gcode_border( pcbdata, config, pcb_side ):
   gcode = ''
   intensity = str( config.laser_border_intensity )
-  speed     = " F" + str( config.laser_speed )
+  speed     = " F" + str( config.laser_border_speed )
 
   minx = pcbdata["edges_bbox"]["minx"] 
   miny = pcbdata["edges_bbox"]["miny"]
@@ -346,20 +346,34 @@ def gcode_pads( pcbdata, config, pcb_side ):
   gcode = ''
   passes    = config.laser_pad_passes
   intensity = str( config.laser_pad_intensity )
-  speed     = " F" + str( config.laser_speed )
+  x_w =  float( config.laser_x_width ) / 2
+  y_w =  float( config.laser_y_width ) / 2
+  speed = " F" + str( config.laser_speed )
   minx = pcbdata["edges_bbox"]["minx"] 
   miny = pcbdata["edges_bbox"]["miny"]
-  maxx = pcbdata["edges_bbox"]["maxx"] 
+  maxx = pcbdata["edges_bbox"]["maxx"]  
   maxy = pcbdata["edges_bbox"]["maxy"]
   def cX( x0, dx, dy, a ):
-    x = x0 + math.cos( a ) * dx - math.sin( a ) * dy 
+    x = math.cos( a ) * dx - math.sin( a ) * dy 
+    # gcode += '('+str(x)
+    if x < 0:
+      x += x_w 
+    else:
+      x -= x_w 
+    x += x0 
+    # gcode += ' '+str(x)+')'
     if pcb_side is "F":
       return str( round_floats( x - minx, 3 ) )
     else:
       return str( round_floats( maxx - x, 3 ) )
     
   def cY( y0, dx, dy, a ):
-    y = y0 + math.sin( a ) * dx + math.cos( a ) * dy 
+    y = math.sin( a ) * dx + math.cos( a ) * dy 
+    if y < 0:
+      y += y_w 
+    else:
+      y -= y_w 
+    y += y0
     if pcb_side is "F":
       return str( round_floats( y - miny, 3 ) )
     else: 
@@ -414,7 +428,7 @@ def gcode_pads( pcbdata, config, pcb_side ):
           nextPad = i
           dist = dist2
         i += 1
-      gcode += "   (d "+str(dist)+ " "+str(i)+" )\n"
+      # gcode += "(d "+str(dist)+ " "+str(i)+" )\n"
 
   return gcode
 
@@ -537,10 +551,10 @@ def run_with_dialog(parser, config, logger):
     )
     try:
         config.netlist_initial_directory = os.path.dirname(parser.file_name)
-        extra_data_file = parser.latest_extra_data(
-                extra_dirs=[config.gcode_dest_dir])
-        if extra_data_file is not None:
-            dlg.set_extra_data_path(extra_data_file)
+        # extra_data_file = parser.latest_extra_data(
+        #         extra_dirs=[config.gcode_dest_dir])
+        # if extra_data_file is not None:
+        #     dlg.set_extra_data_path(extra_data_file)
         config.transfer_to_dialog(dlg.panel)
         if dlg.ShowModal() == wx.ID_OK:
             config.set_from_dialog(dlg.panel)
