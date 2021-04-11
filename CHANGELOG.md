@@ -1,3 +1,8 @@
+# v1.3
+
+* process also "rect" pads
+* to prevent overheat for small distances, 1st even then odd pads are cut
+
 # v1.2
 
 * added config (file only) for 

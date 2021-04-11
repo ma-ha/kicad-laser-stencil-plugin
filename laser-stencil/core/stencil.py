@@ -359,6 +359,7 @@ def gcode_pads( pcbdata, config, pcb_side ):
   miny = pcbdata["edges_bbox"]["miny"]
   maxx = pcbdata["edges_bbox"]["maxx"]  
   maxy = pcbdata["edges_bbox"]["maxy"]
+
   def cX( x0, dx, dy, a ):
     x = math.cos( a ) * dx - math.sin( a ) * dy 
     # gcode += '('+str(x)
@@ -385,15 +386,31 @@ def gcode_pads( pcbdata, config, pcb_side ):
     else: 
       return str( round_floats( maxy - y, 3 ) )
   
-  # gcode += repr( config.component_blacklist )
+  def gCd( pad ):
+    px = pad["px"]
+    py = pad["py"]
+    sx = pad["sx"]
+    sy = pad["sy"]
+    a  = pad["angle"]
+    gcode = 'G00 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) +'\n'
+    gcode += 'M03 S'+intensity +'\n'
+    for passCnt in range(passes):
+      gcode += 'G01 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) + speed+'\n'
+      gcode += 'G01 X'+cX( px,  sx,  sy, a )+ ' Y'+cY( py,  sx,  sy, a ) +'\n'
+      gcode += 'G01 X'+cX( px,  sx, -sy, a )+ ' Y'+cY( py,  sx, -sy, a ) +'\n'
+      gcode += 'G01 X'+cX( px, -sx, -sy, a )+ ' Y'+cY( py, -sx, -sy, a ) +'\n'
+    gcode += 'M05 S0\n'
+    return gcode
 
-  sortPad = []
+  sortFps = []
   for footprint in pcbdata["footprints"]:
     if footprint["layer"] is pcb_side:
       if footprint["ref"] in config.component_blacklist:
         gcode += "( BLACKLIST FOOTPRINT: "+ footprint["ref"] + " skipped )\n"         
       else:
-        gcode += "( FOOTPRINT: "+ footprint["ref"] + " )\n"
+        fpPads = []
+        x = 0
+        y = 0
         for pad in footprint["pads"]:
           if pad["type"] is "smd":
             if pad["shape"] is "roundrect" or pad["shape"] is "rect" :
@@ -402,40 +419,47 @@ def gcode_pads( pcbdata, config, pcb_side ):
                 'px': pad["pos"][0], 'py': pad["pos"][1], 
                 'sx': pad["size"][0] / 2, 'sy': pad["size"][1] / 2, 
                 'angle': math.radians( pad["angle"] ) }
-              sortPad.append( newPad )
+              x =  pad["pos"][0]
+              y =  pad["pos"][1]
+              fpPads.append( newPad )
             else:
-              gcode += "  ( ignored shape " + pad["shape"] + ")\n"
+              gcode += "  ( "+footprint["ref"] +" / ignored shape: " + pad["shape"] + ")\n"
+          else:
+            gcode += "  ( "+footprint["ref"] +" / ignored type: " + pad["type"] + ")\n"
+       
+        if len( fpPads ) > 0:
+          newFP = { 'ref': footprint["ref"], 'px': x, 'py': y, 'pads': fpPads }
+          sortFps.append( newFP )
 
-  nextPad = 0
-  while len( sortPad ) > 0:
-    pad = sortPad.pop( nextPad )
-    px = pad["px"]
-    py = pad["py"]
-    sx = pad["sx"]
-    sy = pad["sy"]
-    a  = pad["angle"]
-    
-    gcode += "( FOOTPRINT: "+ pad["ref"] + " )\n"
-    gcode += 'G00 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) +'\n'
-    gcode += 'M03 S'+intensity +'\n'
-    for passCnt in range(passes):
-      gcode += 'G01 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) + speed+'\n'
-      gcode += 'G01 X'+cX( px,  sx,  sy, a )+ ' Y'+cY( py,  sx,  sy, a ) +'\n'
-      gcode += 'G01 X'+cX( px,  sx, -sy, a )+ ' Y'+cY( py,  sx, -sy, a ) +'\n'
-      gcode += 'G01 X'+cX( px, -sx, -sy, a )+ ' Y'+cY( py, -sx, -sy, a ) +'\n'
-    gcode += 'M05 S0\n'
-    # search nearest next pad
-    nextPad = 0
-    if len( sortPad ) > 0:
-      dist = abs( px - sortPad[0]["px"] ) + abs( py - sortPad[0]["py"] )
+  nextFP = 0
+  while len( sortFps ) > 0:
+    fp = sortFps.pop( nextFP )
+    px = fp["px"]
+    py = fp["py"]
+    gcode += "\n( "+fp["ref"] +"  " + str(px) +" / "+ str(py) + ")\n"
+
+    for padNo in range(0, len(fp["pads"]) ):
+      if padNo % 2 == 0: # even 
+        gcode += "( "+fp["ref"] +" pad #" + str(padNo) + ")\n"
+        gcode += gCd( fp["pads"][padNo] )
+    for padNo in range(0, len(fp["pads"]) ):
+      if padNo % 2 != 0: # odd
+        gcode += "( "+fp["ref"] +" pad #" + str(padNo) + ")\n"
+        gcode += gCd( fp["pads"][padNo] )
+
+    if len( sortFps ) > 0:
+      # find next nearest footprint
+      nextFP = 0
+      minD = abs( px - sortFps[0]["px"] ) + abs( py - sortFps[0]["py"] )
       i = 0
-      for aPad in sortPad:
-        dist2 = abs( px - aPad["px"] ) + abs( py - aPad["py"] )
-        if dist2 < dist:
-          nextPad = i
-          dist = dist2
+      for aFP in sortFps:
+        dist2 = abs( px - aFP["px"] ) + abs( py - aFP["py"] )
+        if dist2 < minD:
+          nextFP = i
+          minD = dist2
         i += 1
-      # gcode += "(d "+str(dist)+ " "+str(i)+" )\n"
+      #   gcode += "( "+str(i) +"  d "+str(dist2)+ " "+ aFP["ref"] +" )\n"
+      # gcode += "(==> d "+str(minD)+ " "+str(nextFP)+" )\n"
 
   return gcode
 
