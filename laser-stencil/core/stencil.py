@@ -229,13 +229,13 @@ def searchNearestNextEdge( sortEdges, px, py ):
         nextEdge = i
         dist = dist2
         reverse = False
-      dist2 = abs( px - someEdge["endx"] ) + abs( py - someEdge["endy"] )
-      if dist2 < dist:
+      dist3 = abs( px - someEdge["endx"] ) + abs( py - someEdge["endy"] )
+      if dist3 < dist:
         nextEdge = i
-        dist = dist2
+        dist = dist3
         reverse = True
       i += 1
-  return nextEdge, reverse
+  return nextEdge, reverse, dist
 
 
 def gcode_border( pcbdata, config, pcb_side ):
@@ -267,10 +267,12 @@ def gcode_border( pcbdata, config, pcb_side ):
 
   nextEdge = 0
   reverse = False
+  px = 0
+  py = 0
   while len( sortEdges ) > 0:
+    nextEdge, reverse, d = searchNearestNextEdge( sortEdges, px, py )
     edge = sortEdges.pop( nextEdge )
-    px = edge["endx"]
-    py = edge["endy"]
+    gcode += '( n='+str(nextEdge)+ ' d='+str(d)+' )\n'
     if reverse :
       gcode += 'G00 X'+cX(edge["endx"])   + ' Y'+cY(edge["endy"])   + '\n'
       gcode += 'M03 S'+intensity +'\n'
@@ -283,8 +285,9 @@ def gcode_border( pcbdata, config, pcb_side ):
       gcode += 'M03 S'+intensity +'\n'
       gcode += 'G01 X'+cX(edge["endx"])   + ' Y'+cY(edge["endy"])   + speed +'\n'
       gcode += 'M05 S0\n\n'
-    nextEdge, reverse = searchNearestNextEdge( sortEdges, px, py )
-
+      px = edge["endx"]
+      py = edge["endy"]
+      
   # for edge in pcbdata["edges"]:
   #   eStart = edge["start"]
   #   gcode += 'G00 X'+cX(eStart[0])+ ' Y'+cY(eStart[1]) +'\n'
@@ -318,10 +321,12 @@ def gcode_border_sim( pcbdata, pcb_side ):
 
   nextEdge = 0
   reverse = False
+  px = 0
+  py = 0
   while len( sortEdges ) > 0:
+    nextEdge, reverse, d = searchNearestNextEdge( sortEdges, px, py )
     edge = sortEdges.pop( nextEdge )
-    px = edge["endx"]
-    py = edge["endy"]
+    
     if reverse :
       gcode += 'G00 X'+cX(edge["endx"])   + ' Y'+cY(edge["endy"])   +'\n'
       gcode += 'G00 X'+cX(edge["startx"]) + ' Y'+cY(edge["starty"]) +'\n'
@@ -330,8 +335,9 @@ def gcode_border_sim( pcbdata, pcb_side ):
     else:
       gcode += 'G00 X'+cX(edge["startx"]) + ' Y'+cY(edge["starty"]) +'\n'
       gcode += 'G00 X'+cX(edge["endx"])   + ' Y'+cY(edge["endy"])   +'\n'
+      px = edge["endx"]
+      py = edge["endy"]
 
-    nextEdge, reverse = searchNearestNextEdge( sortEdges, px, py )
    
   # for edge in pcbdata["edges"]:
   #   eStart = edge["start"]
@@ -387,17 +393,18 @@ def gcode_pads( pcbdata, config, pcb_side ):
       if footprint["ref"] in config.component_blacklist:
         gcode += "( BLACKLIST FOOTPRINT: "+ footprint["ref"] + " skipped )\n"         
       else:
-        gcode += "( FOOTPRINT: "+ footprint["ref"] + " )\n"      
+        gcode += "( FOOTPRINT: "+ footprint["ref"] + " )\n"
         for pad in footprint["pads"]:
           if pad["type"] is "smd":
-            if pad["shape"] is "roundrect":
+            if pad["shape"] is "roundrect" or pad["shape"] is "rect" :
               # gcode += "(" + repr (pad ) + ")\n"
               newPad = { 'ref': footprint["ref"], 
                 'px': pad["pos"][0], 'py': pad["pos"][1], 
                 'sx': pad["size"][0] / 2, 'sy': pad["size"][1] / 2, 
                 'angle': math.radians( pad["angle"] ) }
               sortPad.append( newPad )
-  # gcode += repr (sortPad )
+            else:
+              gcode += "  ( ignored shape " + pad["shape"] + ")\n"
 
   nextPad = 0
   while len( sortPad ) > 0:
