@@ -48,7 +48,7 @@ To reset settings, just delete the respective config lines or the whole file.
 
 # TODO
 
-* process other than "roundrect" pads 
+* support other than "rect" and "roundrect" pads 
 * make "roundrect" with rounded corners, not simply rectangular
 * clean up non used code
 * test on other than Ubuntu (sorry, no Win or Mac here)
