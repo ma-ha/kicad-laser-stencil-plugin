@@ -1,3 +1,7 @@
+# v1.4
+
+* ignore straight line edge parts (fix crashes)
+
 # v1.3
 
 * process also "rect" pads

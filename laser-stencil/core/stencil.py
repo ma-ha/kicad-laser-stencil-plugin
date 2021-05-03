@@ -262,8 +262,13 @@ def gcode_border( pcbdata, config, pcb_side ):
   # prepare optimization of laser path
   sortEdges = []
   for edge in pcbdata["edges"]:
-    newEdge = { "startx": edge["start"][0], "starty": edge["start"][1], "endx": edge["end"][0], "endy": edge["end"][1] }
-    sortEdges.append( newEdge )
+    if  edge["type"] is "segment":
+      newEdge = { "startx": edge["start"][0], "starty": edge["start"][1], "endx": edge["end"][0], "endy": edge["end"][1] }
+      sortEdges.append( newEdge )
+    #if  edge["start"]["type"] == "segment":
+    #  gcode += "(" + repr (edge ) + ")\n"
+    #if  edge["start"]["type"] == "segment":
+    #  gcode += "(" + repr (edge ) + ")\n"
 
   nextEdge = 0
   reverse = False
@@ -316,8 +321,13 @@ def gcode_border_sim( pcbdata, pcb_side ):
   # prepare optimization of laser path
   sortEdges = []
   for edge in pcbdata["edges"]:
-    newEdge = { "startx": edge["start"][0], "starty": edge["start"][1], "endx": edge["end"][0], "endy": edge["end"][1] }
-    sortEdges.append( newEdge )
+    if edge["type"] is "segment":
+      newEdge = { "startx": edge["start"][0], "starty": edge["start"][1], "endx": edge["end"][0], "endy": edge["end"][1] }
+      sortEdges.append( newEdge )
+    #if  edge["start"]["type"] == "arc":
+    # TODO
+    #if  edge["start"]["type"] == "circle":
+    # TODO
 
   nextEdge = 0
   reverse = False
