@@ -14,7 +14,7 @@ Generated G-Code files:
 The plugin is based on the awesome [iBom plugin](https://github.com/openscopeproject/InteractiveHtmlBom) code.
 
 # Installation
-
+## KiCad 5.1.x
 Copy the whole `laser-stencil` folder (including all files and sub-folders) into your KiCAD plugin directory.
 
 * Windows
@@ -33,6 +33,19 @@ Restart of Pcbnew.
 
 The plugin icon should appear in the tool bar.
 
+## KiCad 6
+
+Plugin directory canged! 
+If you open Pcb Editor and "Tool" menu > "External Plugins" > "Open Plugin Directory", 
+you will see where KiCad is searching for plugins. 
+Please copy the `laser-stencil` folder to this dir.
+
+For Linux, installation should be like:
+
+    git clone https://github.com/ma-ha/kicad-laser-stencil-plugin.git
+    cd kicad-laser-stencil-plugin
+    cp -r laser-stencil ~/.local/share/kicad/6.0/scripting/plugins
+    
 # Config
 
 Not all configuration parameters are in the dialog. 
