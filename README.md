@@ -40,12 +40,20 @@ If you open Pcb Editor and "Tool" menu > "External Plugins" > "Open Plugin Direc
 you will see where KiCad is searching for plugins. 
 Please copy the `laser-stencil` folder to this dir.
 
-For Linux, installation should be like:
+For **Linux**, installation should be like:
 
     git clone https://github.com/ma-ha/kicad-laser-stencil-plugin.git
     cd kicad-laser-stencil-plugin
     cp -r laser-stencil ~/.local/share/kicad/6.0/scripting/plugins
     
+On **Windows** install works for me like this:
+- Clone or Download this repository as Zip file and extract it
+- Copy the folder `laser-stencil` with Ctrl-C
+- In Explorer navigate to the KiCad installation folder, e.g. `C:/Program Files/KiCad/6.0`
+- Navigate to `share/kicad/scripting/plugins`
+- Paste the `laser-stencil` folder into the plugins folder with Ctrl-V
+- In the PCB Editor open the "Tools" Menu, there the "External Plugins" and click "Refresh Plugins"
+
 # Config
 
 Not all configuration parameters are in the dialog. 
