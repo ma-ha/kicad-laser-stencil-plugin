@@ -1,3 +1,6 @@
+# v1.5
+* parser updated for KiCad 6
+
 # v1.4
 
 * ignore straight line edge parts (fix crashes)
