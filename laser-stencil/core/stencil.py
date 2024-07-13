@@ -269,6 +269,11 @@ def gcode_border( pcbdata, config, pcb_side ):
     #  gcode += "(" + repr (edge ) + ")\n"
     #if  edge["start"]["type"] == "segment":
     #  gcode += "(" + repr (edge ) + ")\n"
+  for edge in pcbdata["edges"]:
+    if  edge["type"] is "segment":
+      newEdge = { "startx": edge["start"][0], "starty": edge["start"][1], "endx": edge["end"][0], "endy": edge["end"][1] }
+      sortEdges.append( newEdge )
+      break
 
   nextEdge = 0
   reverse = False
@@ -328,6 +333,11 @@ def gcode_border_sim( pcbdata, pcb_side ):
     # TODO
     #if  edge["start"]["type"] == "circle":
     # TODO
+  for edge in pcbdata["edges"]:
+    if edge["type"] is "segment":
+      newEdge = { "startx": edge["start"][0], "starty": edge["start"][1], "endx": edge["end"][0], "endy": edge["end"][1] }
+      sortEdges.append( newEdge )
+      break
 
   nextEdge = 0
   reverse = False
@@ -409,6 +419,7 @@ def gcode_pads( pcbdata, config, pcb_side ):
       gcode += 'G01 X'+cX( px,  sx,  sy, a )+ ' Y'+cY( py,  sx,  sy, a ) +'\n'
       gcode += 'G01 X'+cX( px,  sx, -sy, a )+ ' Y'+cY( py,  sx, -sy, a ) +'\n'
       gcode += 'G01 X'+cX( px, -sx, -sy, a )+ ' Y'+cY( py, -sx, -sy, a ) +'\n'
+    gcode += 'G01 X'+cX( px, -sx,  sy, a )+ ' Y'+cY( py, -sx,  sy, a ) +'\n'
     gcode += 'M05 S0\n'
     return gcode
 
