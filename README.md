@@ -35,7 +35,7 @@ The plugin icon should appear in the tool bar.
 
 ## KiCad 6
 
-Plugin directory canged! 
+Plugin directory changed! 
 If you open Pcb Editor and "Tool" menu > "External Plugins" > "Open Plugin Directory", 
 you will see where KiCad is searching for plugins. 
 Please copy the `laser-stencil` folder to this dir.
@@ -53,6 +53,13 @@ On **Windows** install works for me like this:
 - Navigate to `share/kicad/scripting/plugins`
 - Paste the `laser-stencil` folder into the plugins folder with Ctrl-V
 - In the PCB Editor open the "Tools" Menu, there the "External Plugins" and click "Refresh Plugins"
+
+## KiCad 9
+Plugin directory changed again!
+### Windows:
+- Plugin directory is: C:\\Users\\[Username]\\Documents\\KiCad\\9.0\\3rdparty\\plugins
+- Clone or Download this repository as Zip file and extract it
+- Copy the folder `laser-stencil` to the plugin directory
 
 # Config
 
