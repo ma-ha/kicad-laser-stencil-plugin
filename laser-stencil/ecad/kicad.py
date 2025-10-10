@@ -241,7 +241,7 @@ class PcbnewParser(EcadParser):
             }
         elif hasattr(d, 'GetEffectiveTextShape'):
             shape = d.GetEffectiveTextShape(
-                aTriangulate=False)  # type: pcbnew.SHAPE_COMPOUND
+                )  # type: pcbnew.SHAPE_COMPOUND (parameter aTriangulate=False removed)
             segments = []
             polygons = []
             for s in shape.GetSubshapes():
